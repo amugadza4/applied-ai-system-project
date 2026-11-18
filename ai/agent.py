@@ -5,38 +5,121 @@ from ai.ai_assistant import (
     retrieve_knowledge,
     format_retrieved_knowledge
 )
-
+from ai.interaction_logger import InteractionLogger
 from pawpal_system import Task
 
 
 class PawPalAgent:
     """
-    Coordinates pet-care requests by retrieving information,
-    creating proposed plans, checking conflicts, and managing
-    owner approval before modifying the pet schedule.
+    Coordinates pet-care requests using knowledge retrieval,
+    safety checks, interaction logging, and owner approval.
     """
+
+    EMERGENCY_KEYWORDS = [
+        "difficulty breathing",
+        "trouble breathing",
+        "can't breathe",
+        "cannot breathe",
+        "choking",
+        "seizure",
+        "having a seizure",
+        "unconscious",
+        "collapsed",
+        "collapse",
+        "severe bleeding",
+        "bleeding heavily",
+        "hit by a car",
+        "hit by a vehicle",
+        "poison",
+        "poisoning",
+        "toxic substance",
+        "ate something toxic",
+        "unable to urinate",
+        "cannot urinate",
+        "can't urinate"
+    ]
+
+    DIAGNOSIS_KEYWORDS = [
+        "diagnose",
+        "diagnosis",
+        "what is wrong with",
+        "what disease does",
+        "does my dog have",
+        "does my cat have",
+        "does my pet have",
+        "is my dog sick",
+        "is my cat sick",
+        "is my pet sick"
+    ]
 
     def __init__(self, owner):
         self.owner = owner
+        self.logger = InteractionLogger()
 
     def find_pet(self, pet_name):
         """Find a pet belonging to the owner."""
+        if not isinstance(pet_name, str):
+            return None
+
         for pet in self.owner.pets:
             if pet.name.lower() == pet_name.lower():
                 return pet
 
         return None
 
-    def create_care_plan(self, pet_name, request):
-        """
-        Retrieve relevant pet-care information and prepare
-        a proposed care plan without changing the schedule.
-        """
+    def _log_interaction(
+        self,
+        pet_name,
+        species,
+        request,
+        outcome,
+        topics=None
+    ):
+        """Record an interaction without interrupting the app if logging fails."""
+        try:
+            self.logger.log_interaction(
+                pet_name=pet_name,
+                species=species,
+                request=request,
+                outcome=outcome,
+                topics=topics
+            )
+        except OSError:
+            pass
 
-        # Step 1: Find the requested pet.
+    def _check_emergency(self, request):
+        """Check whether a request contains an emergency keyword."""
+        request_lower = request.lower()
+
+        return any(
+            keyword in request_lower
+            for keyword in self.EMERGENCY_KEYWORDS
+        )
+
+    def _check_diagnosis_request(self, request):
+        """Check whether a user is requesting a medical diagnosis."""
+        request_lower = request.lower()
+
+        return any(
+            keyword in request_lower
+            for keyword in self.DIAGNOSIS_KEYWORDS
+        )
+
+    def create_care_plan(self, pet_name, request):
+        """Retrieve relevant pet-care information and create recommendations."""
+
+        request = str(request or "").strip()
         pet = self.find_pet(pet_name)
 
+        # Check whether the selected pet exists.
         if pet is None:
+            self._log_interaction(
+                pet_name,
+                None,
+                request,
+                "pet_not_found"
+            )
+
             return {
                 "success": False,
                 "message": f"I could not find a pet named {pet_name}.",
@@ -46,13 +129,72 @@ class PawPalAgent:
                 "conflicts": []
             }
 
-        # Step 2: Retrieve relevant knowledge.
+        # Emergency safety check.
+        if self._check_emergency(request):
+            message = (
+                "This request may describe a veterinary emergency. "
+                "Please contact an emergency veterinarian or go to "
+                "the nearest emergency animal hospital immediately. "
+                "Do not wait for an AI-generated care plan."
+            )
+
+            self._log_interaction(
+                pet.name,
+                pet.species,
+                request,
+                "emergency_warning"
+            )
+
+            return {
+                "success": False,
+                "message": message,
+                "pet": pet,
+                "knowledge": [],
+                "plan": [],
+                "conflicts": [],
+                "safety_warning": True
+            }
+
+        # Medical diagnosis safety check.
+        if self._check_diagnosis_request(request):
+            message = (
+                "PawPal cannot diagnose medical conditions. "
+                "A licensed veterinarian can examine your pet "
+                "and provide an accurate diagnosis. Please contact "
+                "your veterinarian about your concerns."
+            )
+
+            self._log_interaction(
+                pet.name,
+                pet.species,
+                request,
+                "medical_boundary"
+            )
+
+            return {
+                "success": False,
+                "message": message,
+                "pet": pet,
+                "knowledge": [],
+                "plan": [],
+                "conflicts": [],
+                "safety_warning": True
+            }
+
+        # Retrieve relevant knowledge.
         knowledge = retrieve_knowledge(
             query=request,
             species=pet.species
         )
 
         if not knowledge:
+            self._log_interaction(
+                pet.name,
+                pet.species,
+                request,
+                "no_relevant_information"
+            )
+
             return {
                 "success": False,
                 "message": (
@@ -65,7 +207,7 @@ class PawPalAgent:
                 "conflicts": []
             }
 
-        # Step 3: Prepare a proposed care plan.
+        # Generate recommendations.
         plan = []
 
         for record in knowledge:
@@ -79,7 +221,7 @@ class PawPalAgent:
                 "source_url": record.get("source_url", "")
             })
 
-        # Step 4: Check for matching existing recommendations.
+        # Check for conflicts with existing pet tasks.
         existing_tasks = pet.get_tasks()
         conflicts = []
 
@@ -95,7 +237,18 @@ class PawPalAgent:
                         "time": existing_task.time
                     })
 
-        # Step 5: Return the proposal for owner review.
+        # Log successful interaction.
+        self._log_interaction(
+            pet.name,
+            pet.species,
+            request,
+            "success",
+            topics=[
+                record.get("topic", "Unknown")
+                for record in knowledge
+            ]
+        )
+
         return {
             "success": True,
             "message": "Care plan created for review.",
@@ -118,12 +271,9 @@ class PawPalAgent:
         time,
         frequency
     ):
-        """
-        Approve a recommendation and add it to the pet's schedule.
-        """
+        """Add an individual recommendation after owner approval."""
 
-        # Step 1: Validate the care plan.
-        if not result or not result.get("success"):
+        if not isinstance(result, dict) or not result.get("success"):
             return {
                 "success": False,
                 "message": "There is no valid care plan to approve."
@@ -135,19 +285,14 @@ class PawPalAgent:
                 "message": "This care plan has already been rejected."
             }
 
-        # Step 2: Verify the pet belongs to the owner.
         pet = result.get("pet")
 
-        if not any(
-            existing_pet is pet
-            for existing_pet in self.owner.pets
-        ):
+        if pet is None or self.find_pet(pet.name) is not pet:
             return {
                 "success": False,
-                "message": "This pet does not belong to this owner."
+                "message": "This care plan does not belong to your pet."
             }
 
-        # Step 3: Validate the selected recommendation.
         plan = result.get("plan", [])
 
         if (
@@ -161,123 +306,110 @@ class PawPalAgent:
                 "message": "Invalid recommendation selection."
             }
 
-        # Step 4: Validate the scheduled time.
+        # Validate time.
         try:
-            parsed_time = datetime.strptime(time, "%H:%M")
-
-            if parsed_time.strftime("%H:%M") != time:
-                raise ValueError
-
+            datetime.strptime(time, "%H:%M")
         except (ValueError, TypeError):
             return {
                 "success": False,
-                "message": (
-                    "Please enter a valid time in HH:MM format."
-                )
+                "message": "Please enter a valid time in HH:MM format."
             }
 
-        # Step 5: Validate task frequency.
+        # Validate frequency.
         if frequency not in ["Daily", "Weekly", "Once"]:
             return {
                 "success": False,
-                "message": "Invalid task frequency."
+                "message": "Please select Daily, Weekly, or Once."
             }
 
-        # Step 6: Prevent duplicate approvals.
-        approved_indices = result.setdefault(
+        approved = result.setdefault(
             "approved_recommendations",
             []
         )
 
-        if recommendation_index in approved_indices:
+        if recommendation_index in approved:
             return {
                 "success": False,
-                "message": (
-                    "This recommendation has already been approved."
-                )
+                "message": "This recommendation has already been approved."
             }
+
+        # Prevent scheduling two tasks at the same time.
+        for existing_task in self.owner.get_all_tasks():
+            try:
+                existing_time = existing_task.time
+
+                if existing_time == time:
+                    return {
+                        "success": False,
+                        "message": (
+                            f"You already have a task scheduled "
+                            f"at {time}. Please choose another time."
+                        )
+                    }
+
+            except AttributeError:
+                continue
 
         recommendation = plan[recommendation_index]
-        description = recommendation.get("description")
 
-        if not description:
-            return {
-                "success": False,
-                "message": "The recommendation has no task description."
-            }
-
-        # Step 7: Check for scheduling conflicts.
-        conflicting_tasks = [
-            task
-            for task in self.owner.get_all_tasks()
-            if task.time == time
-        ]
-
-        if conflicting_tasks:
-            return {
-                "success": False,
-                "message": "Scheduling conflict detected.",
-                "conflicts": conflicting_tasks
-            }
-
-        # Step 8: Add the task after all checks pass.
         new_task = Task(
-            description=description,
+            description=recommendation["description"],
             time=time,
             frequency=frequency
         )
 
         pet.add_task(new_task)
 
-        approved_indices.append(recommendation_index)
+        approved.append(recommendation_index)
 
-        result["approved"] = True
+        result["approved"] = (
+            len(approved) == len(plan)
+        )
 
         return {
             "success": True,
             "message": (
-                "Recommendation approved and added to the schedule."
+                f"{recommendation['description']} "
+                f"has been added to {pet.name}'s schedule."
             ),
             "task": new_task
         }
 
     def reject_plan(self, result):
-        """
-        Reject a care plan without changing the pet's schedule.
-        """
+        """Reject a care plan without adding recommendations."""
 
-        # Step 1: Validate the care plan.
-        if not result or not result.get("success"):
+        if not isinstance(result, dict) or not result.get("success"):
             return {
                 "success": False,
                 "message": "There is no valid care plan to reject."
             }
 
-        # Step 2: Verify the pet belongs to the owner.
-        if not any(
-            result.get("pet") is pet
-            for pet in self.owner.pets
-        ):
+        if result.get("rejected"):
             return {
                 "success": False,
-                "message": "This pet does not belong to this owner."
+                "message": "This care plan has already been rejected."
             }
 
-        # Step 3: Do not reject a plan with approved tasks.
+        pet = result.get("pet")
+
+        if pet is None or self.find_pet(pet.name) is not pet:
+            return {
+                "success": False,
+                "message": "This care plan does not belong to your pet."
+            }
+
         if result.get("approved_recommendations"):
             return {
                 "success": False,
                 "message": (
-                    "Some recommendations have already been approved."
+                    "Some recommendations have already been approved. "
+                    "The plan cannot be rejected after approval."
                 )
             }
 
-        # Step 4: Mark the proposal as rejected.
         result["rejected"] = True
 
         return {
             "success": True,
-            "message": (
-                "Care plan rejected. No tasks were added."
-            )
+            "message": "Care plan rejected. No tasks were added."
         }

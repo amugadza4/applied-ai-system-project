@@ -1,40 +1,31 @@
 # AI Interactions Log
 
-> **Stretch features only.** Only fill in the sections that apply to stretch features you attempted. If you did not attempt a stretch feature, leave its section blank or delete it. This file is not required for the core project.
+## AI Development Tools
 
----
+I used ChatGPT as an interactive development assistant throughout the PawPal+ project.
 
-## Agent Workflow (SF7)
+I used it for:
+- Brainstorming application features and implementation approaches.
+- Writing and improving Python code.
+- Debugging errors.
+- Connecting application components.
+- Creating and reviewing automated tests.
+- Updating project documentation.
 
-> Document your experience using an AI agent (e.g., Cursor Agent, Claude, Copilot) to make multi-step changes autonomously.
+I reviewed the suggested code, made implementation decisions, and tested changes before incorporating them into the project.
 
-**What task did you give the agent?**
+## Stretch Feature SF7: Autonomous Agent Workflow
 
-<!-- Describe the goal you asked the agent to accomplish -->
+**Status: Not attempted as a separate autonomous coding-agent experiment.**
 
-**What did the agent do?**
+ChatGPT assisted with development through an interactive question-and-answer process. I did not conduct a separate experiment in which an autonomous coding agent independently completed a multi-step development task.
 
-<!-- List the steps the agent took (files edited, commands run, etc.) -->
+The rule-driven agent inside PawPal+ is part of the application itself and is different from an autonomous coding agent used to modify the project.
 
-**What did you have to verify or fix manually?**
+## Stretch Feature SF11: Prompt Comparison
 
-<!-- Describe anything the agent got wrong or that required human review -->
+**Status: Not attempted as a formal controlled prompt-comparison experiment.**
 
----
+I used specific, task-focused prompts throughout development,but I  did not conduct a controlled experiment comparing two models or systematically measuring two prompt approaches on the same task.
 
-## Prompt Comparison (SF11)
-
-> Compare two different prompts (or two different models) on the same task.
-
-| | Option A | Option B |
-|-|----------|----------|
-| **Model / tool used** | | |
-| **Prompt** | | |
-| **Response summary** | | |
-| **What was useful** | | |
-| **Problems noticed** | | |
-| **Decision** | | |
-
-**Which approach did you use in your final implementation and why?**
-
-<!-- Your conclusion -->
+I found that providing the existing code, expected behavior, and specific problem helped me receive more relevant development guidance.

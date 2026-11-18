@@ -1,0 +1,28 @@
+
+flowchart TD
+    A["User"] --> B["Streamlit Interface<br/>app.py"]
+
+    B --> C["PawPal System<br/>pawpal_system.py"]
+    C --> D["Owner"]
+    D --> E["Pet"]
+    E --> F["Task"]
+
+    B --> G["PawPal Agent<br/>ai/agent.py"]
+
+    G --> H{"Safety Checks"}
+    H -->|Emergency or diagnosis request| I["Safety Warning"]
+    H -->|Normal request| J["Knowledge Retrieval<br/>ai/ai_assistant.py"]
+
+    J --> K["Pet Care Knowledge Base<br/>pet_care.json"]
+    K --> L["Care Recommendations"]
+    L --> M["Conflict Detection"]
+    M --> N["Owner Reviews Recommendations"]
+
+    N -->|Approve| O["Add Approved Tasks<br/>to Pet Schedule"]
+    N -->|Reject| P["Reject Care Plan"]
+
+    O --> Q["Updated Schedule"]
+    F --> Q
+
+    G --> R["Interaction Logger<br/>ai/interaction_logger.py"]
+    R --> S["Local Interaction Logs"]
