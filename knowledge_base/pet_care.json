@@ -1,0 +1,66 @@
+
+[
+  {
+    "id": "DOG001",
+    "species": "Dog",
+    "category": "Exercise",
+    "topic": "Daily exercise",
+    "content": "Adult dogs generally benefit from regular daily physical activity. Exercise needs vary based on breed, age, size, health, and energy level. Walking, playing, and other appropriate activities can help support a dog's physical and mental well-being.",
+    "source": "American Kennel Club",
+    "source_url": "https://www.akc.org/"
+  },
+  {
+    "id": "DOG002",
+    "species": "Dog",
+    "category": "Nutrition",
+    "topic": "Feeding routine",
+    "content": "Dogs benefit from a consistent feeding routine. Food portions and feeding frequency depend on age, weight, activity level, and health. Owners should follow veterinary guidance and the feeding recommendations for their dog's food.",
+    "source": "American Animal Hospital Association",
+    "source_url": "https://www.aaha.org/"
+  },
+  {
+    "id": "DOG003",
+    "species": "Dog",
+    "category": "Preventive Care",
+    "topic": "Veterinary checkups",
+    "content": "Routine veterinary examinations help monitor a dog's overall health and identify potential health concerns. The appropriate frequency of visits depends on the dog's age, health, and individual needs.",
+    "source": "American Animal Hospital Association",
+    "source_url": "https://www.aaha.org/"
+  },
+  {
+    "id": "CAT001",
+    "species": "Cat",
+    "category": "Nutrition",
+    "topic": "Feeding routine",
+    "content": "Cats benefit from a consistent feeding routine. Food portions and feeding frequency depend on age, weight, activity level, and health. Fresh drinking water should always be available.",
+    "source": "Cornell Feline Health Center",
+    "source_url": "https://www.vet.cornell.edu/departments-centers-and-institutes/cornell-feline-health-center"
+  },
+  {
+    "id": "CAT002",
+    "species": "Cat",
+    "category": "Hygiene",
+    "topic": "Litter box maintenance",
+    "content": "Litter boxes should be scooped regularly and kept clean. Many cats prefer accessible litter boxes in quiet locations. The number of litter boxes and their placement should accommodate the household's cats.",
+    "source": "Cornell Feline Health Center",
+    "source_url": "https://www.vet.cornell.edu/departments-centers-and-institutes/cornell-feline-health-center"
+  },
+  {
+    "id": "CAT003",
+    "species": "Cat",
+    "category": "Enrichment",
+    "topic": "Play and mental stimulation",
+    "content": "Interactive play and environmental enrichment support cats' physical activity and mental stimulation. Toys, climbing spaces, scratching surfaces, and opportunities to engage in natural behaviors can improve their environment.",
+    "source": "Cornell Feline Health Center",
+    "source_url": "https://www.vet.cornell.edu/departments-centers-and-institutes/cornell-feline-health-center"
+  },
+  {
+    "id": "ALL001",
+    "species": "All",
+    "category": "Safety",
+    "topic": "Veterinary emergencies",
+    "content": "Pet owners should contact a veterinarian promptly when an animal experiences concerning symptoms. Severe difficulty breathing, collapse, seizures, or suspected poisoning require immediate veterinary attention. An AI assistant cannot diagnose medical conditions or replace professional veterinary care.",
+    "source": "American Veterinary Medical Association",
+    "source_url": "https://www.avma.org/"
+  }
+]
