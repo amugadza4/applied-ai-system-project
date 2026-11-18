@@ -1,78 +1,72 @@
 # PawPal+ 🐾
-### Pet Care Scheduling and AI-Assisted Planning Application
+## Pet Care Scheduling and AI-Assisted Planning Application
 
-## Project Overview
+## 1. Project Overview
 
 **Original project: PawPal+ (Module 3)**
 
-PawPal originally focused on helping pet owners organize their pets' care routines through pet management and task scheduling. Its core capabilities allowed users to add pets, create care tasks, organize schedules, and track completed responsibilities.
+The original Module 3 version of PawPal+ focused on helping pet owners organize their pets' care routines. Users could add pets, create care tasks, organize schedules, and track completed responsibilities.
 
-PawPal+ expands that original project by introducing a retrieval-based pet-care assistant, a rule-driven agent workflow, safety checks, and interaction logging.
+This final project extends that system by introducing a retrieval-based pet-care assistant, a rule-driven agent workflow, safety guardrails, and interaction logging.
 
-PawPal+ is a Python and Streamlit application designed to help pet owners manage everyday care responsibilities while accessing relevant pet-care information. It combines traditional software engineering with a structured knowledge-retrieval workflow and keeps owners in control of scheduling decisions.
+PawPal+ is a Python and Streamlit application that combines pet-care scheduling with structured knowledge retrieval. It helps owners access relevant pet-care information and turn recommendations into scheduled tasks while keeping the owner in control of decisions.
 
-## Features
+## 2. Features
 
-### 1. Pet Management
+### Pet Management
 - Add pets to an owner's profile.
 - Store pet names and species.
 - Select a pet when creating tasks or requesting recommendations.
 
-### 2. Pet Care Scheduling
-- Create tasks for individual pets.
-- Set task descriptions, scheduled times, and frequencies.
+### Pet Care Scheduling
+- Create care tasks for individual pets.
+- Set task descriptions, times, and frequencies.
 - Organize tasks chronologically.
 - Mark tasks as completed.
 - Support Daily, Weekly, and Once task frequencies.
 - Identify scheduling conflicts.
 
-### 3. AI-Assisted Pet Care
+### AI-Assisted Pet Care
 
-PawPal+ uses a retrieval-based, rule-driven agent to coordinate pet-care requests.
+PawPal+ uses a retrieval-based assistant and rule-driven agent workflow to process pet-care requests.
 
 The assistant can:
 - Retrieve relevant information from a curated pet-care knowledge base.
-- Use the selected pet's species to filter relevant information.
+- Filter information based on the selected pet's species.
+- Rank retrieved information using keyword relevance scoring.
 - Organize retrieved information into care recommendations.
 - Display supporting sources.
-- Check recommendations against existing tasks.
+- Check recommendations against existing scheduled tasks.
 - Present recommendations for owner review.
 
-### 4. Owner Approval Workflow
-
-PawPal+ keeps the owner involved in scheduling decisions.
-
-- Recommendations are not automatically added to the schedule.
+### Owner Approval Workflow
+- Recommendations are presented for review rather than automatically added.
 - Owners can approve individual recommendations.
 - Approved recommendations become scheduled pet-care tasks.
-- Owners can reject a care plan before approving recommendations.
+- Owners can reject recommendations.
 - The application checks for scheduling conflicts before adding tasks.
 
-### 5. Safety Guardrails
-
-The application includes basic keyword-based safety checks.
-
+### Safety Guardrails
+PawPal+ includes basic keyword-based safety checks:
 - Emergency-related requests trigger a warning directing owners to contact an emergency veterinarian.
 - Medical diagnosis requests are redirected to a licensed veterinarian.
-- Requests without relevant knowledge-base information receive a response explaining that no relevant information was found.
+- Requests without relevant knowledge-base information receive a response indicating that no relevant information was found.
 
 PawPal+ is an informational and organizational tool. It does not diagnose medical conditions or replace professional veterinary advice.
 
-### 6. Interaction Logging
-
+### Interaction Logging
 The application records AI assistant interactions in JSON Lines format.
 
 Logged information includes:
 - Timestamp
-- Pet name
-- Pet species
+- Pet name and species
 - User request
 - Interaction outcome
 - Retrieved knowledge topics
 
 Logs are stored locally in `logs/ai_interactions.jsonl` and excluded from version control.
 
-## Technologies Used
+## 3. Technologies Used
 
 | Technology | Purpose |
 |---|---|
@@ -80,180 +74,221 @@ Logs are stored locally in `logs/ai_interactions.jsonl` and excluded from versio
 | Streamlit | Interactive web application |
 | JSON | Structured pet-care knowledge base |
 | Pytest | Automated testing |
-| Git and GitHub | Version control and project management |
+| Git and GitHub | Version control |
 
-## Architecture Overview
+## 4. System Architecture
 
-PawPal+ is organized into four main parts:
+PawPal+ is organized into four main components:
 
-1. **Core application (`pawpal_system.py`):** Defines the Owner, Pet, Task, and Scheduler classes and manages pet information and scheduling functionality.
-2. **AI components (`ai/`):** Handles knowledge retrieval, agent decisions, recommendation approval, safety checks, and interaction logging.
+1. **Core application (`pawpal_system.py`):** Defines the Owner, Pet, Task, and Scheduler classes and manages pet information and scheduling.
+2. **AI components (`ai/`):** Handle knowledge retrieval, agent decisions, safety checks, recommendation approval, and interaction logging.
 3. **Knowledge base (`knowledge_base/`):** Stores curated pet-care information in a structured JSON file.
 4. **User interface (`app.py`):** Connects the core application and AI components through Streamlit.
 
-The architecture diagram in `diagrams/architecture.mmd` illustrates how a user's request moves through the application. The request is handled by the agent, checked against safety rules, and passed to the retrieval component. Retrieved information is used to create recommendations, which the owner can review before approved tasks are added to the scheduling system.
+The architecture diagram is maintained as Mermaid source in:
 
-The UML diagrams in `diagrams/` show the relationships and responsibilities of the application's main classes.
+`diagrams/architecture.mmd`
 
-## How the AI Assistant Works
+The UML diagram is maintained in:
 
-PawPal+ uses a retrieval-based, rule-driven workflow rather than a generative AI model or external language model API.
+`diagrams/uml_final.mmd`
+
+The architecture diagram represents the implemented workflow:
+
+**User request → Safety checks → Knowledge retrieval → Recommendation generation → Conflict detection → Owner approval → Schedule update → Interaction logging**
+
+## 5. How the AI Assistant Works
+
+PawPal+ uses structured knowledge retrieval and a rule-driven agent workflow. It does not use a generative language model or external LLM API.
 
 The workflow follows these steps:
 
 1. **User Request:** The owner selects a pet and submits a pet-care question.
-2. **Safety Checks:** The agent checks for emergency-related requests and medical diagnosis requests.
+2. **Safety Checks:** The agent checks for emergency-related and medical diagnosis requests.
 3. **Knowledge Retrieval:** The assistant searches the curated JSON knowledge base using keyword matching and relevance scoring.
-4. **Recommendation Generation:** The agent organizes relevant retrieved information into recommendations.
-5. **Conflict Detection:** The system checks recommendations against the pet's existing tasks.
-6. **Owner Review:** The owner reviews recommendations and chooses whether to approve or reject them.
-7. **Schedule Update:** Approved recommendations are added to the pet's schedule.
-8. **Interaction Logging:** The application records the interaction and its outcome.
+4. **Species Filtering:** Retrieved information is filtered to match the selected pet's species where applicable.
+5. **Recommendation Generation:** The agent organizes relevant information into care recommendations.
+6. **Conflict Detection:** The system checks recommendations against the pet's existing scheduled tasks.
+7. **Owner Review:** The owner reviews recommendations and chooses whether to approve or reject them.
+8. **Schedule Update:** Approved recommendations are added to the pet's schedule.
+9. **Interaction Logging:** The application records the interaction and its outcome.
 
-This approach demonstrates how structured information retrieval, decision rules, safety checks, and human oversight can work together in an AI-assisted application.
+This workflow demonstrates how retrieval, decision rules, safety checks, and human oversight can work together in an AI-assisted application.
 
-## Sample Interactions
+## 6. Sample End-to-End Interactions
 
-The following examples demonstrate the application's intended behavior and manually verified safety responses.
+The following examples demonstrate the application's expected behavior. The normal care-plan example describes the workflow; the diagnosis and emergency examples show the application's safety response text.
 
 ### Example 1: Pet-care information request
 
 **Input:**
 
-"How much exercise does my dog need?"
+```text
+How much exercise does my dog need?
+```
 
 **Application behavior:**
 
-- Retrieves relevant dog exercise information from the knowledge base.
-- Displays the retrieved information and its supporting source.
-- Presents care recommendations for the owner to review.
-- Allows the owner to approve recommendations before they are added to the schedule.
+1. The owner selects a dog in the application.
+2. The assistant searches the pet-care knowledge base.
+3. Relevant dog exercise information is retrieved.
+4. The application displays the information and its source.
+5. The assistant presents recommendations for owner review.
 
-**Result:** The normal recommendation and approval workflow was tested successfully.
+**Application response:**
+
+```text
+Care plan created for review.
+```
+
+**Owner action:**
+
+The owner reviews the recommendations and approves one.
+
+**Result:**
+
+```text
+Daily exercise has been added to Buddy's schedule.
+```
+
+The owner can also reject recommendations instead of adding them.
 
 ### Example 2: Medical diagnosis request
 
 **Input:**
 
-"What is wrong with my dog?"
+```text
+What is wrong with my dog?
+```
 
 **Application output:**
 
-"PawPal cannot diagnose medical conditions. A licensed veterinarian can examine your pet and provide an accurate diagnosis. Please contact your veterinarian about your concerns."
+```text
+PawPal cannot diagnose medical conditions. A licensed veterinarian can examine your pet and provide an accurate diagnosis. Please contact your veterinarian about your concerns.
+```
 
-**Result:** The safety check prevents the application from generating a care plan for a diagnosis-related request.
+**Result:**
+
+The diagnosis safety check prevents the application from generating a normal care plan for the request.
 
 ### Example 3: Potential veterinary emergency
 
 **Input:**
 
-"My dog is having trouble breathing."
+```text
+My dog is having trouble breathing.
+```
 
 **Application output:**
 
-"This request may describe a veterinary emergency. Please contact an emergency veterinarian or go to the nearest emergency animal hospital immediately. Do not wait for an AI-generated care plan."
+```text
+This request may describe a veterinary emergency. Please contact an emergency veterinarian or go to the nearest emergency animal hospital immediately. Do not wait for an AI-generated care plan.
+```
 
-**Result:** The emergency safety check displays an urgent warning instead of proceeding with a normal care plan.
+**Result:**
 
-## Knowledge Base
+The emergency safety check displays an urgent warning instead of proceeding with the normal recommendation workflow.
 
-The pet-care knowledge base is stored in:
+## 7. Knowledge Base and Retrieval
+
+The structured pet-care knowledge base is stored in:
 
 `knowledge_base/pet_care.json`
 
 It contains curated information covering topics such as:
-
 - Dog exercise
-- Feeding routines
+- Dog feeding routines
 - Veterinary checkups
+- Cat feeding routines
 - Cat litter box maintenance
-- Cat enrichment and play
+- Cat play and mental stimulation
 - Veterinary emergencies
 
 The retrieval system uses keyword matching and relevance scoring to identify potentially relevant information.
 
-Retrieved information includes its topic, content, source, and source URL.
+The scoring approach gives greater weight to topic and category matches than general content matches. Retrieved information includes its topic, content, source, and source URL.
 
-## Scheduling System
+This approach provides a transparent and manageable starting point for retrieving relevant pet-care information.
+
+## 8. Scheduling System
 
 The core scheduling functionality is implemented in `pawpal_system.py`.
 
 | Method | Responsibility |
 |---|---|
-| `Task.mark_complete()` | Marks a task as completed and handles recurring tasks. |
-| `Pet.add_task()` | Adds a task to a pet. |
-| `Pet.get_tasks()` | Retrieves a pet's tasks. |
-| `Scheduler.sort_by_time()` | Sorts tasks chronologically. |
-| `Scheduler.filter_tasks()` | Filters tasks by pet or completion status. |
-| `Scheduler.detect_conflicts()` | Identifies tasks scheduled at the same time. |
+| `Task.mark_complete()` | Marks a task as completed and handles recurring tasks |
+| `Pet.add_task()` | Adds a task to a pet |
+| `Pet.get_tasks()` | Retrieves a pet's tasks |
+| `Scheduler.sort_by_time()` | Sorts tasks chronologically |
+| `Scheduler.filter_tasks()` | Filters tasks by pet or completion status |
+| `Scheduler.detect_conflicts()` | Identifies tasks scheduled at the same time |
 
-One scheduling trade-off is that conflict detection currently checks for matching scheduled times rather than overlapping task durations. This keeps the implementation simple because tasks do not currently have duration or date attributes.
+**Design trade-off:** Conflict detection currently checks for matching scheduled times rather than overlapping task durations. This keeps the implementation simple because tasks do not currently have duration attributes.
 
-## Installation and Setup
+## 9. Installation and Setup
 
 ### Requirements
-
 - Python 3.12 or a compatible Python version
 - pip
 - Git
 
-### 1. Clone the repository
+### Step 1: Clone the repository
 
 ```bash
 git clone https://github.com/amugadza4/applied-ai-system-project.git
 ```
 
-### 2. Navigate to the project directory
+### Step 2: Navigate to the project directory
 
 ```bash
 cd applied-ai-system-project
 ```
 
-### 3. Create a virtual environment
+### Step 3: Create a virtual environment
 
 ```bash
 python3 -m venv .venv
 ```
 
-### 4. Activate the virtual environment
+### Step 4: Activate the virtual environment
 
-macOS/Linux:
+**macOS/Linux:**
 
 ```bash
 source .venv/bin/activate
 ```
 
-Windows:
+**Windows:**
 
 ```bash
 .venv\Scripts\activate
 ```
 
-### 5. Install dependencies
+### Step 5: Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## Running PawPal+
+## 10. Running the Application
 
-### Launch the Streamlit application
+To launch the Streamlit application, run:
 
 ```bash
 streamlit run app.py
 ```
 
-Streamlit will provide a local URL that you can open in your browser.
+Streamlit will provide a local URL. Open that URL in your browser to use PawPal+.
 
-### Run the command-line application
+The repository also includes a command-line entry point:
 
 ```bash
 python3 main.py
 ```
 
-## Reliability and Testing
+## 11. Reliability and Testing
 
-PawPal+ uses Pytest to evaluate the core scheduling functionality, knowledge retrieval, agent workflow, safety checks, and interaction logging.
+PawPal+ uses Pytest to test the core scheduling functionality, knowledge retrieval, agent workflow, safety checks, and interaction logging.
 
 Run the complete test suite:
 
@@ -261,7 +296,7 @@ Run the complete test suite:
 python -m pytest -v
 ```
 
-Or use:
+Or use the shorter command:
 
 ```bash
 python -m pytest -q
@@ -269,57 +304,77 @@ python -m pytest -q
 
 ### Test Coverage
 
-| Test File | Functionality |
+| Test file | Functionality tested |
 |---|---|
-| `test_pawpal_system.py` | Pet management, task management, recurring tasks, sorting, and conflicts |
-| `test_ai_assistant.py` | Knowledge retrieval and handling unrelated requests |
-| `test_agent.py` | Care-plan creation, approval, rejection, safety checks, and logging |
-| `test_interaction_logger.py` | Log creation, interaction details, and multiple records |
+| `tests/test_pawpal_system.py` | Pet management, task management, recurring tasks, sorting, and scheduling conflicts |
+| `tests/test_ai_assistant.py` | Knowledge retrieval and handling unrelated requests |
+| `tests/test_agent.py` | Care-plan creation, approval, rejection, safety checks, and logging |
+| `tests/test_interaction_logger.py` | Log creation, interaction details, and multiple records |
 
-**Latest verified test result: 35 passed.**
+**Previously verified test result:** 35 tests passed.
 
-### What Worked
+Run the test command above to verify the current version of the project.
 
-- Core pet-management and scheduling functionality.
-- Chronological task organization.
-- Retrieval of relevant pet-care information.
-- Recommendation review and approval.
-- Emergency and diagnosis-related safety warnings.
-- Local interaction logging.
+### Reliability Mechanisms
 
-### Limitations and Lessons Learned
+The application includes several mechanisms to improve reliability:
 
-Keyword-based retrieval can return information that is not perfectly relevant to every question. The safety checks also rely on predefined keywords, so they cannot recognize every possible emergency or medical concern. Conflict detection does not account for task duration.
+- Input and pet selection checks in the application workflow.
+- Keyword-based emergency and diagnosis safeguards.
+- Relevance scoring during knowledge retrieval.
+- Handling for requests without relevant knowledge-base results.
+- Scheduling conflict detection.
+- Owner approval before recommendations become scheduled tasks.
+- Automated tests for core functionality and safety behavior.
+- Interaction logs for reviewing assistant outcomes.
 
-Testing helped identify issues and verify that individual components worked together. It also reinforced the importance of testing the actual user experience rather than relying only on code-level checks.
+These mechanisms reduce the chance of irrelevant recommendations or unsafe scheduling decisions. However, they do not guarantee that every possible unsafe or inaccurate response will be detected.
 
-## Project Documentation
+## 12. Design Trade-offs and Limitations
 
-Additional project materials:
+PawPal+ was designed to provide a practical, understandable AI-assisted workflow without relying on an external language model.
 
-- `model_card.md` — Responsible-AI considerations, collaboration, and system limitations.
-- `ai_interactions.md` — Documentation for applicable AI-related stretch features.
-- `reflection.md` — General project development reflection.
-- `diagrams/` — UML and architecture diagrams.
+The current implementation has several limitations:
 
-## Future Improvements
+- **Keyword-based retrieval:** The system may not understand every variation of a user's question.
+- **Limited knowledge base:** Recommendations are restricted to the curated information available in the JSON file.
+- **Keyword-based safety checks:** The safeguards cannot recognize every possible emergency or medical concern.
+- **Scheduling limitations:** Conflict detection does not account for task duration or overlapping time ranges.
+- **Limited personalization:** Recommendations do not account for every individual pet characteristic or medical history.
+- **Local logging:** Interaction logs are stored locally and are not designed as a secure medical-record system.
 
-Potential enhancements include:
+Future improvements could include more advanced retrieval, expanded veterinary sources, date-based scheduling, duration-aware conflict detection, more detailed pet profiles, and broader safety evaluation.
+
+## 13. AI Collaboration and Project Reflection
+
+AI tools, including ChatGPT, were used during development to support planning, debugging, code review, testing, and documentation.
+
+AI assistance helped identify potential improvements to the agent workflow and reliability safeguards. One suggestion that was accepted was adding emergency and diagnosis-related checks to prevent the assistant from treating potentially serious medical concerns as ordinary care-planning requests.
+
+Another suggestion involving automatic date-based expansion of recurring tasks was revised rather than adopted because the existing scheduling model did not yet support the date and duration information needed to implement it reliably.
+
+This project reinforced that AI-generated suggestions should be evaluated against the actual codebase and project requirements instead of being accepted automatically.
+
+Building PawPal+ also demonstrated that an AI-assisted system does not necessarily need a generative model to provide useful functionality. Structured retrieval, rule-based decisions, safety checks, and human approval can work together to support a practical application.
+
+For additional details, see:
+- `model_card.md` — Responsible-AI considerations, intended use, limitations, and AI collaboration.
+- `ai_interactions.md` — Development interactions and AI collaboration notes.
+- `reflection.md` — Project development reflection.
+
+## 14. Future Improvements
+
+Potential future enhancements include:
 
 - More advanced natural-language understanding.
 - Improved knowledge retrieval and relevance ranking.
+- Expanded pet-care knowledge sources.
 - More detailed pet profiles and personalized recommendations.
 - Date-based scheduling and task-duration support.
 - More advanced scheduling conflict detection.
-- Expanded pet-care knowledge sources.
-- Additional safety and evaluation tests.
-
-## Project Reflection
-
-Building PawPal+ helped me understand how software components can work together to solve a practical problem. I learned that an AI-assisted application does not necessarily need to rely on a generative model; structured knowledge retrieval and a rule-driven workflow can also provide useful functionality.
-
-The project also reinforced the importance of testing, human oversight, and designing features around the actual needs of the user.
+- Expanded safety checks and evaluation tests.
+- Improved privacy protections for interaction logs.
 
 ---
 
-PawPal+ demonstrates how Python application development, scheduling algorithms, structured knowledge retrieval, rule-driven agent workflows, and human approval can be combined into a practical pet-care application.
+**PawPal+ demonstrates how Python application development, structured knowledge retrieval, rule-driven agent workflows, scheduling functionality, reliability safeguards, and human approval can be combined into a practical pet-care application.**
